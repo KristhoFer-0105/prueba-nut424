@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Prueba de repaso NUT 424</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una sola columna de estudio, con barra de avance fija y mapa de 50 preguntas */
+:root{
+  --bg:#faf7fe;--surface:#ffffff;--soft:#f0e9fa;--line:#e0d4f2;--fg:#2a1a40;--muted:#6a5a82;
+  --accent:#5e2b8c;--strong:#3b1361;--accent2:#8a5cc4;--on:#ffffff;--band:#3b1361;--band2:#5e2b8c;--bandfg:#ffffff;--bandmuted:#d8cbee;
+  --ok:#1b7a50;--okbg:#e0f4e9;--bad:#bf3648;--badbg:#fce5e8;--sol:#5e2b8c;--solbg:#ece2f9;
+  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;--body:"Figtree","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#170d24;--surface:#21142f;--soft:#2d1d41;--line:#433059;--fg:#f1eafb;--muted:#b6a7cb;
+  --accent:#bd9aee;--strong:#dcc9f7;--accent2:#9d74d9;--on:#1b0f2b;--band:#2a1648;--band2:#46247a;--bandfg:#ffffff;--bandmuted:#d8cbee;
+  --ok:#74d9a6;--okbg:#153a2a;--bad:#f48e9a;--badbg:#47202b;--sol:#d3bcf6;--solbg:#37244f;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#170d24;--surface:#21142f;--soft:#2d1d41;--line:#433059;--fg:#f1eafb;--muted:#b6a7cb;
+  --accent:#bd9aee;--strong:#dcc9f7;--accent2:#9d74d9;--on:#1b0f2b;--band:#2a1648;--band2:#46247a;--bandfg:#ffffff;--bandmuted:#d8cbee;
+  --ok:#74d9a6;--okbg:#153a2a;--bad:#f48e9a;--badbg:#47202b;--sol:#d3bcf6;--solbg:#37244f;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--body)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+.hero{background:var(--band);color:var(--bandfg);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-90px;top:-120px;width:340px;height:340px;border-radius:50%;background:var(--band2)}
+.hero .wrap{position:relative;z-index:1;padding-block:30px 26px}
+.kicker{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--bandmuted)}
+h1{font:800 clamp(32px,6vw,50px)/1.05 var(--display);margin:6px 0 10px;text-wrap:balance}
+.hero p{margin:0;max-width:60ch;color:var(--bandmuted)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar .wrap{padding-block:10px;display:grid;gap:8px}
+.stats{display:flex;flex-wrap:wrap;gap:6px 20px;align-items:baseline;font-variant-numeric:tabular-nums}
+.stats b{font:800 20px var(--display);color:var(--strong)}
+.stats span{font-size:14px;color:var(--muted)}
+.track{height:8px;border-radius:4px;background:var(--soft);overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.f{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;color:var(--muted)}
+.f[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.map{padding-block:14px 4px}
+.map summary{cursor:pointer;font-weight:600;color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(38px,1fr));gap:6px;margin-top:10px}
+.n{height:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.n.clean{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.n.errors{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.n.revealed{background:var(--solbg);border-color:var(--sol);color:var(--sol)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+main{display:grid;gap:16px;padding-block:14px 30px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;scroll-margin-top:130px;min-width:0}
+.q.clean{border-color:var(--ok)}.q.errors{border-color:var(--bad)}.q.revealed{border-color:var(--sol)}
+.qh{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:8px}
+.num{font:800 24px/1 var(--display);color:var(--accent)}
+.tag{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--soft);color:var(--strong)}
+.state{margin-left:auto;font-size:13px;font-weight:700}
+.state.clean{color:var(--ok)}.state.errors{color:var(--bad)}.state.revealed{color:var(--sol)}
+.stem{margin:0 0 12px;font-weight:500}
+.part+.part{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.pq{margin:0 0 8px;font-weight:600}
+.lab{color:var(--accent);font-weight:800;margin-right:4px}
+.opts{display:grid;gap:7px}
+.opt{display:block;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:9px;padding:9px 12px}
+.opt:hover:not([disabled]){border-color:var(--accent2);background:var(--soft)}
+.opt.ok,.tfb.ok{background:var(--okbg);border-color:var(--ok);color:var(--ok);font-weight:600}
+.opt.bad,.tfb.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+.opt.sol,.tfb.sol{background:var(--solbg);border-color:var(--sol);color:var(--sol);font-weight:600}
+.opt[disabled],.tfb[disabled]{cursor:default}
+.tf{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center}
+.tfbs{display:flex;gap:5px}
+.tfb{width:42px;height:36px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);font-weight:700}
+.tf>p{margin:0}
+.pool{display:flex;flex-wrap:wrap;gap:7px;min-height:46px;padding:9px;border-radius:9px;background:var(--soft);margin-bottom:10px}
+.pool:empty::after{content:"Sin términos pendientes";color:var(--muted);font-size:14px;align-self:center}
+.chip{touch-action:none;user-select:none;-webkit-user-select:none;border:1.5px solid var(--accent2);background:var(--surface);color:var(--strong);border-radius:8px;padding:5px 10px;font-size:15px;font-weight:600;cursor:grab;max-width:100%;text-align:left}
+.chip.sel{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.chip.ok{border-color:var(--ok);background:var(--okbg);color:var(--ok);cursor:default}
+.chip.bad{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+.chip.sol{border-color:var(--sol);background:var(--solbg);color:var(--sol);cursor:default}
+.chip.dim{opacity:.45;cursor:default}
+.ghost{position:fixed;z-index:50;pointer-events:none;margin:0;box-shadow:0 6px 18px rgba(40,10,80,.3)}
+.slot{border:1.5px dashed var(--accent2);border-radius:8px;background:transparent;min-height:40px;padding:3px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;cursor:pointer}
+.slot.over{background:var(--soft);border-style:solid}
+.mrow{display:grid;grid-template-columns:minmax(120px,38%) minmax(0,1fr);gap:10px;align-items:center}
+.mlist,.olist{display:grid;gap:7px}
+.mrow>span{font-size:15px}
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.bucket{display:flex;flex-direction:column;min-width:0}
+.bucket h4{margin:0 0 5px;font:700 14px var(--body);color:var(--strong)}
+.bucket .slot{flex:1;align-content:flex-start;min-height:74px}
+.orow{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:center}
+.orow b{font:800 18px var(--display);color:var(--accent);text-align:center}
+.cloze{line-height:2.5}
+.cloze .slot{display:inline-flex;vertical-align:middle;min-width:92px;min-height:34px;line-height:1.3}
+.numrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.numrow input{width:130px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:600 16px var(--body)}
+.numrow input.ok{border-color:var(--ok);background:var(--okbg);color:var(--ok)}
+.numrow input.bad{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+.numrow input.sol{border-color:var(--sol);background:var(--solbg);color:var(--sol)}
+.msg{font-size:14px;font-weight:600}
+.msg.ok{color:var(--ok)}.msg.bad{color:var(--bad)}.msg.sol{color:var(--sol)}
+.acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.b{border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:8px;padding:5px 12px;font-size:14px;font-weight:700}
+.b.main{background:var(--accent);color:var(--on)}
+.b[disabled]{opacity:.45;cursor:default}
+.note{margin-top:10px;padding:10px 12px;border-radius:9px;background:var(--soft);font-size:15px}
+.note strong{color:var(--strong)}
+.src{display:block;margin-top:3px;font-size:13px;color:var(--muted)}
+.end{background:var(--band);color:var(--bandfg);border-radius:12px;padding:20px;display:grid;gap:8px}
+.end h2{margin:0;font:800 26px var(--display)}
+.end p{margin:0;color:var(--bandmuted)}
+.end .b{border-color:var(--bandmuted);color:var(--bandfg);justify-self:start}
+.empty{padding:20px;text-align:center;color:var(--muted)}
+@media (max-width:520px){.mrow{grid-template-columns:minmax(0,1fr)}.q{padding:14px}.state{margin-left:0;width:100%}
+  .tools{flex-wrap:nowrap;overflow-x:auto;padding-bottom:3px}.f{flex:none}.stats{flex-wrap:nowrap;gap:12px}.stats b{font-size:17px}.stats span{font-size:12px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">Nutrición Integrada Profesional · NUT 424</div>
+  <h1>Prueba de repaso</h1>
+  <p>50 preguntas y casos de OT SAN 2025 y Alimentación colectiva. Selecciona, arrastra o toca un término y luego su espacio: la corrección aparece al instante.</p>
+</div></header>
+
+<div class="bar"><div class="wrap">
+  <div class="stats" aria-live="polite">
+    <div><b id="sDone">0/50</b> <span>respondidas</span></div>
+    <div><b id="sClean">0</b> <span>a la primera</span></div>
+    <div><b id="sNote">–</b> <span>nota estimada</span></div>
+  </div>
+  <div class="track"><i id="prog"></i></div>
+  <div class="tools" id="filters"></div>
+</div></div>
+
+<div class="wrap">
+  <section class="map"><details open>
+    <summary>Mapa de preguntas</summary>
+    <div class="grid" id="grid"></div>
+    <div class="legend"><span><i style="background:var(--ok)"></i>A la primera</span><span><i style="background:var(--bad)"></i>Con errores</span><span><i style="background:var(--sol)"></i>Viste la solución</span></div>
+  </details></section>
+  <main id="list"></main>
+  <section class="end" id="end" style="margin-bottom:30px">
+    <h2 id="endT">Tu resultado aparecerá aquí</h2>
+    <p id="endP">Una pregunta cuenta como correcta a la primera si la resolviste sin errores y sin ver la solución. Las pistas no bajan el puntaje.</p>
+    <div id="resetBox"><button class="b" id="reset">Reiniciar toda la prueba</button></div>
+  </section>
+</div>
+
+<script>
+const M=(q,o,a)=>({k:'mcq',q,o,a}),MU=(q,o,a)=>({k:'multi',q,o,a}),TF=(q,r)=>({k:'tf',q,r}),
+N=(q,a,u='',tol=0)=>({k:'num',q,a,u,tol}),MA=(q,p)=>({k:'match',q,p}),CL=(q,b,i)=>({k:'classify',q,b,i}),
+O=(q,s)=>({k:'order',q,s}),CZ=(q,t,x=[])=>({k:'cloze',q,t,x});
+const I=(area,stem,parts,hint,exp,src)=>({area,stem,parts:Array.isArray(parts)?parts:[parts],hint,exp,src});
+const OT='ot',AC='ac',MX='mx';
+const Q=[
+// ---------- OT SAN 2025 ----------
+I(OT,'Una nutricionista dice que la OT SAN 2025 dejó sin efecto la Norma Técnica de 2005.',
+ M('¿Qué corresponde responderle?',['La NT 2005 sigue vigente y la OT la complementa','La OT 2025 derogó la NT 2005','La OT solo aplica a clínicas privadas','La NT 2005 solo rige para SEDILE y CEFE'],0),
+ 'Piensa en la palabra que usa la OT para describir su propósito frente a la norma.','La OT se elaboró para complementar los contenidos de la NT 2005, que se mantiene vigente.','OT SAN, diap. 7'),
+I(OT,'Une cada dependencia del SAN con su función.',
+ MA('',[['UCP','Área exclusiva de producción de raciones dietoterapéuticas y preparaciones culinarias'],['UDD','Apoyo cercano a las salas: colaciones, preparaciones simples y retermalización'],['SEDILE','Fórmulas lácteas'],['CEFE','Fórmulas enterales y suplementos de nutrición oral'],['CAN','Comité que asesora a la Dirección en alimentación y nutrición']]),
+ 'La D de UDD viene de distribución y la L de SEDILE, de leche.','UCP produce, UDD apoya la distribución, SEDILE prepara fórmulas lácteas, CEFE enterales y el CAN asesora a la Dirección.','OT SAN, diap. 8, 9, 15, 17'),
+I(OT,'Una UCP produce en un día 120 desayunos, 40 colaciones AM, 120 almuerzos, 120 onces y 120 cenas.',
+ N('Calcula las Raciones Totales del Día (RTD).',100,'RTD'),
+ 'Multiplica cada tiempo por su coeficiente y suma. Desayuno y once usan 0,15.','18 + 4 + 30 + 18 + 30 = 100 RTD.','OT SAN, diap. 14, 26'),
+I(OT,'Ordena cada tiempo de comida según su coeficiente de ración día.',
+ CL('',['0,10','0,15','0,25'],[['Desayuno',1],['Colación AM',0],['Almuerzo',2],['Once',1],['Cena',2],['Colación PM',0]]),
+ 'Los coeficientes suman 1 y los dos tiempos principales valen lo mismo.','Colaciones 0,10; desayuno y once 0,15; almuerzo y cena 0,25.','OT SAN, diap. 14'),
+I(OT,'Caso. Una UCP tiene RTD = 400. Cuenta con hornos combinados y lavavajillas, pero no con marmitas automáticas. Además de los 5 regímenes usuales elabora 45 almuerzos en líneas adicionales. El 35 % de su materia prima vegetal llega sin procesar.',
+ [M('FC por nivel tecnológico',['1,0','1,1','1,2'],1),M('FC por líneas de producción',['1,0','1,1','1,2','1,3'],1),M('FC por materia prima vegetal',['1,0','1,1'],1),N('RCD, redondeada a entero',532,'RCD'),M('Complejidad de la UCP',['Mínima','Mediana','Máxima'],2)],
+ 'Tener al menos 1 de los 3 equipos ya define el factor. Después multiplica los tres FC por la RTD.','Los tres FC son 1,1. RCD = 400 × 1,1 × 1,1 × 1,1 = 532,4, es decir 532: máxima complejidad (≥ 300).','OT SAN, diap. 13, 22–25'),
+I(OT,'Indica si cada afirmación sobre complejidad es verdadera o falsa.',
+ TF('',[['Una UCP con RCD 149 es de complejidad mínima.',true],['Una UCP con RCD 150 es de complejidad máxima.',false],['Una UCP con RCD 300 es de complejidad máxima.',true],['El cálculo considera solo las raciones a pacientes.',false]]),
+ 'Mínima llega hasta 149 y máxima parte en 300. Revisa también a quiénes incluye el cálculo.','Mínima ≤ 149, mediana 150–299, máxima ≥ 300. El cálculo incluye pacientes y funcionarios.','OT SAN, diap. 13, 14'),
+I(OT,'Ordena los pasos para clasificar la complejidad de una UCP.',
+ O('',['Identificar los tiempos de comida','Obtener las unidades producidas por tiempo','Aplicar los coeficientes de ración','Calcular las Raciones Totales del Día','Determinar los factores de complejidad','Calcular la RCD y clasificar']),
+ 'Primero se cuenta lo que se produce. Los factores se aplican sobre un número ya calculado.','Tiempos, unidades, coeficientes, RTD, factores y finalmente RCD con su clasificación.','OT SAN, diap. 26'),
+I(OT,'Caso. Una UCP tiene RCD 180 y entrega 120 raciones a pacientes. Calcula con los factores productivos del rango que corresponde.',
+ [N('Recepción y almacenamiento (RR.HH.)',1.8,'',0.05),N('Producción, técnicos (una decimal)',5.1,'',0.1),N('Lavado, auxiliares',3.6,'',0.05),N('Distribución a servicios clínicos',6,'',0.05)],
+ 'RCD 180 cae en el rango 101–200. Para distribución se usan las raciones totales a pacientes.','180/100 = 1,8; 180/35 = 5,1; 180/50 = 3,6; 120/20 = 6.','OT SAN, diap. 30–32'),
+I(OT,'Clasifica cada cargo según su nivel de gestión.',
+ CL('',['Estratégico','Táctico','Operativo'],[['Nutricionista jefe',0],['Coordinadores',0],['Nutricionista de producción',1],['Nutricionista de calidad',1],['Nutricionista clínico asistencial',1],['Técnicos en alimentación',2],['Bodegueros',2],['Auxiliares de servicio',2]]),
+ 'El nivel operativo ejecuta directamente. El táctico supervisa áreas concretas.','Estratégico: jefatura y coordinación. Táctico: nutricionistas de producción, clínica y calidad. Operativo: técnicos, bodegueros y auxiliares.','OT SAN, diap. 36'),
+I(OT,'Ordena las etapas del pedido mensual de la UCP.',
+ O('',['Elaborar inventario','Determinar presupuesto disponible','Determinar planificación alimentaria','Estandarizar minutas','Elaborar desgloses según raciones proyectadas','Sumar materias primas del periodo','Ajustar pedido según stock','Elaborar pedido mensual']),
+ 'Parte por saber qué hay y con cuánto dinero se cuenta. El ajuste por stock va casi al final.','El pedido parte del inventario y presupuesto, sigue con minutas y desgloses, y termina ajustado por stock.','OT SAN, diap. 47'),
+I(OT,'Completa con las exigencias de planta física.',
+ CZ('','Los pisos deben tener un declive de [[1 a 2 %]] y sumideros [[removibles]]. La OT prohíbe las [[canaletas]] y sitúa la [[cámara desgrasadora]] fuera de la UCP. El rango máximo interior de temperatura es [[21–26 °C]].',['5 a 8 %','fijos','bodegas','15–18 °C']),
+ 'Dos de los términos describen el sistema de evacuación de aguas.','Declive de 1 a 2 %, sumideros removibles, sin canaletas, cámara desgrasadora fuera de la UCP y 21–26 °C.','OT SAN, diap. 43'),
+I(OT,'Clasifica cada materia prima según su frecuencia de recepción sugerida.',
+ CL('',['Diario','1 vez/semana','1–2 veces/semana','2–3 veces/semana','Mensual'],[['Pan',0],['Lácteos',1],['Verduras a granel',2],['Cárnicos',3],['Verduras preelaboradas',3],['Abarrotes',4]]),
+ 'Cuanto más perecible y menos espacio requiera, más frecuente. Los abarrotes duran más.','Pan diario, lácteos semanal, verduras a granel 1–2 veces, cárnicos y preelaboradas 2–3 veces y abarrotes mensual.','OT SAN, diap. 48'),
+I(OT,'Clasifica cada alimento según el sistema NOVA.',
+ CL('',['Grupo 1: sin procesar','Grupo 2: ingredientes culinarios','Grupo 3: procesados','Grupo 4: ultraprocesados'],[['Manzana',0],['Lentejas secas',0],['Aceite vegetal',1],['Azúcar',1],['Verduras en conserva',2],['Bebida gaseosa',3],['Galletas rellenas',3]]),
+ 'El grupo 2 se usa para cocinar y no se come solo. El grupo 4 son formulaciones industriales listas para consumir.','G1 alimentos sin procesar; G2 aceite y azúcar; G3 conservas; G4 bebidas y galletas industriales.','OT SAN, diap. 49'),
+I(OT,'Caso. Para un régimen común se planificaron 2.000 kcal y 70 g de proteína. La minuta calculada aporta 2.100 kcal y 50 g de proteína.',
+ [N('Adecuación de energía',105,'%',0.5),M('¿La energía cumple el rango de la OT?',['Sí','No'],0),N('Adecuación de proteína (entero)',71,'%',1),M('¿Qué corresponde hacer?',['Ajustar la minuta para aumentar proteína','Aceptarla porque la energía cumple','Reducir la energía a 1.800 kcal'],0)],
+ 'Adecuación = aporte ÷ meta × 100. El rango es de 90 a 110 %.','2.100/2.000 = 105 % cumple. 50/70 = 71 % no cumple, y en el régimen común se verifican energía, macro y micronutrientes.','OT SAN, diap. 54'),
+I(OT,'Selecciona todos los criterios de calidad que están correctos según la OT.',
+ MU('',['Azúcares simples ≤ 10 % del VCT','Grasas saturadas < 10 % del VCT','Fibra 25–30 g/día','Menos de 5 g de sal al día','Grasas trans < 5 %','Colesterol hasta 500 mg/día'],[0,1,2,3]),
+ 'Hay dos opciones con cifras demasiado altas.','Las grasas trans deben ser < 1 % y el colesterol hasta 300 mg/día.','OT SAN, diap. 54'),
+I(OT,'Une cada tiempo de comida con su horario recomendado.',
+ MA('',[['Desayuno','7:30–8:00'],['Almuerzo','12:00–13:00'],['Once','16:00–17:00'],['Cena','19:00–20:00']]),
+ 'Son los horarios habituales de un hospital, de la mañana a la noche.','Desayuno 7:30–8:00, almuerzo 12:00–13:00, once 16:00–17:00 y cena 19:00–20:00.','OT SAN, diap. 55'),
+I(OT,'Verdadero o falso sobre planificación.',
+ TF('',[['El ayuno nocturno debe ser de 12 horas o menos.',true],['Los intervalos entre comidas o colaciones son de 2 a 4 horas.',true],['Todo paciente debe recibir 2 L de agua, sin excepción.',false],['Los cálculos de la minuta se actualizan como mínimo cada 5 años.',false]]),
+ 'Revisa la frase que acompaña a la meta de 2 L y el plazo de actualización.','Los 2 L dependen de que la condición de salud lo permita. Los cálculos se actualizan como mínimo cada 2 años.','OT SAN, diap. 54, 55'),
+I(OT,'Une cada régimen con su característica.',
+ MA('',[['Papilla','Tipo puré, 65 % sólidos y 35 % líquidos'],['Blando','Sólidos suaves y de fácil masticación'],['Líquido','Alimentos fluidos con viscosidad ajustable'],['Liviano','Excluye irritantes y meteorizantes, con grasa restringida'],['Sin residuos','Excluye alimentos ricos en fibra, lactosa e irritantes']]),
+ 'Los tres primeros se definen por consistencia y los dos últimos por digestibilidad.','Papilla, blando y líquido cambian la consistencia. Liviano y sin residuos, la digestibilidad.','OT SAN, diap. 56'),
+I(OT,'Clasifica cada procedimiento según corresponda a POE o POES.',
+ CL('',['POE (operacionales)','POES (sanitización)'],[['Proveedores',0],['Trazabilidad',0],['Equipos de medición',0],['Agua y hielo',1],['Higiene personal',1],['Control de plagas',1],['Manejo de desechos',1]]),
+ 'POES lleva la S de sanitización: se relaciona con el control higiénico.','POE organiza operaciones y controles. POES organiza el control higiénico sanitario.','OT SAN, diap. 61'),
+I(OT,'Ordena la pirámide de gestión de la inocuidad desde la base hasta la cima.',
+ O('',['BPM, BPF, POE y POES','Programas de prerrequisitos','HACCP','ISO 22000']),
+ 'La norma internacional certificable corona la pirámide.','La base son BPM y POES; luego prerrequisitos, HACCP e ISO 22000.','OT SAN, diap. 59'),
+// ---------- ALIMENTACIÓN COLECTIVA ----------
+I(AC,'Une cada concepto con su definición.',
+ MA('',[['Limpieza','Eliminar tierra, residuos, polvo, grasa u otra materia visible'],['Desinfección','Reducir microorganismos hasta un nivel que no comprometa la inocuidad'],['Inocuidad','Garantía de que el alimento no dañará al consumidor'],['ETA','Enfermedad por ingerir alimentos o agua contaminados'],['Contaminación cruzada','Transferencia de contaminantes de un alimento o superficie a otro alimento']]),
+ 'La limpieza actúa sobre lo que se ve y la desinfección sobre lo que no.','La limpieza retira materia visible. La desinfección reduce microorganismos.','Colectiva, diap. 3–6'),
+I(AC,'Caso. Durante un turno, una supervisora observa a un manipulador con cofia y uniforme limpio. Además: lleva su anillo, usa perfume intenso, tiene diarrea desde ayer y se lavó las manos al cambiar de tarea.',
+ MU('Selecciona todo lo que NO está permitido.',['Usar anillo','Perfume intenso','Trabajar con diarrea','Lavarse las manos al cambiar de tarea','Usar cofia'],[0,1,2]),
+ 'Dos de las cinco acciones son justamente lo que se espera de un manipulador.','Joyas, perfumes fuertes y trabajar con síntomas transmisibles están prohibidos.','Colectiva, diap. 8, 9'),
+I(AC,'Clasifica cada elemento de protección personal.',
+ CL('',['EPP habitual','EPP especial'],[['Cofia',0],['Mascarilla',0],['Pechera desechable',0],['Calzado antideslizante',0],['Antiparras',1],['Guantes de nitrilo',1],['Mascarilla con filtros',1]]),
+ 'Los especiales protegen frente a riesgos específicos, como químicos.','El EPP especial incluye antiparras, guantes de nitrilo y mascarilla con filtros.','Colectiva, diap. 10'),
+I(AC,'Une cada examen del manipulador con lo que evalúa.',
+ MA('',[['Nasofaríngeo','Secreciones de la garganta, detrás de la nariz'],['Coprocultivo','Cultivo de una muestra fecal'],['Parasitológico seriado','Presencia de parásitos intestinales'],['Cultivo subungueal','Microorganismos en piel o uñas']]),
+ 'Subungueal significa debajo de la uña.','El nombre de cada examen indica la zona o muestra que analiza.','Colectiva, diap. 11'),
+I(AC,'Caso. Un casino sirve almuerzo y debe guardar muestras de referencia de sus preparaciones según el RSA.',
+ [N('Cantidad mínima aproximada por preparación',100,'g'),N('Tiempo mínimo de conservación',72,'horas'),MU('El rótulo debe incluir:',['Nombre de la preparación','Fecha y hora de elaboración','Manipulador o área','Precio de venta','Número de comensales'],[0,1,2]),M('¿Para qué se usan?',['Solo para investigación sanitaria por ETA','Para degustar antes del servicio','Para calcular costos'],0)],
+ 'Piensa en cuántos días deben estar disponibles si aparece un brote.','Unos 100 g, mínimo 72 horas, rotulados con preparación, fecha y hora y responsable, para uso exclusivo en investigación por ETA.','Colectiva, diap. 12'),
+I(AC,'Clasifica cada preparación según la temperatura mínima de cocción en el centro.',
+ CL('',['≥ 70 °C','≥ 75 °C','≥ 80 °C'],[['Vacuno entero',0],['Pescado',0],['Tortilla de huevo',0],['Arroz',1],['Legumbres',1],['Papas',1],['Hamburguesa',2],['Ave',2],['Cerdo',2]]),
+ 'Las carnes molidas, de ave y de cerdo exigen la temperatura más alta.','≥ 80 °C molidas, cerdo, cordero, ave, mariscos y cecinas crudas; ≥ 75 °C pastas, arroz, cereales, legumbres y papas; ≥ 70 °C vacuno entero, pescado, huevo, frutas y verduras.','Colectiva, diap. 16'),
+I(AC,'Verdadero o falso sobre temperaturas.',
+ TF('',[['Un congelado que llega a −20 °C cumple en recepción.',true],['Un refrigerado que llega a 7 °C cumple en recepción.',false],['Frutas y verduras se almacenan a 10–15 °C.',true],['Una preparación caliente se distribuye desde 60 °C.',false]]),
+ 'Refrigerados 0–5 °C y calientes desde 65 °C.','Congelados < −18 °C; refrigerados 0–5 °C; frutas y verduras 10–15 °C; calientes ≥ 65 °C.','Colectiva, diap. 15, 16'),
+I(AC,'Clasifica dónde almacenarías cada producto.',
+ CL('',['Refrigerado 0–5 °C','Congelado < −18 °C','Frutas y verduras 10–15 °C','Bodega no perecibles'],[['Yogurt',0],['Pescado fresco',0],['Acelga preelaborada',0],['Carne para 2 meses',1],['Fruta fresca',2],['Arroz',3],['Leche líquida en caja cerrada',3]]),
+ 'La pregunta clave es cuánto tiempo debe durar y si el envase está cerrado.','Yogurt, pescado y preelaborados van refrigerados. La carne para 2 meses, congelada. La leche en caja cerrada es no perecible.','Colectiva, diap. 15, 17'),
+I(AC,'Caso. Una preparación caliente sale de cocina a las 12:00 a 68 °C y su distribución termina a las 14:30.',
+ [N('Duración de la distribución',150,'min'),N('Minutos por sobre el máximo',30,'min'),M('¿Cuál es el principal incumplimiento?',['El tiempo de distribución','La temperatura de salida','Ninguno'],0)],
+ 'La temperatura cumple. Convierte 2 horas y media a minutos.','Son 150 minutos y el máximo es 120: excede 30. Los 68 °C sí cumplen ≥ 65 °C.','Colectiva, diap. 16'),
+I(AC,'Selecciona los 4 factores críticos que exige la aprobación de BPM.',
+ MU('',['Abastecimiento de agua potable','Manejo de residuos sólidos','Disposición de residuos líquidos','Servicios higiénicos de los manipuladores','Control de temperatura de cámaras','Uso de cofia'],[0,1,2,3]),
+ 'Tienen que ver con el saneamiento básico del establecimiento.','Agua potable, residuos sólidos, residuos líquidos y servicios higiénicos.','Colectiva, diap. 26'),
+I(AC,'Caso. En una lista de chequeo BPM, un casino obtiene 60 puntos de 75 aplicables.',
+ [N('Porcentaje de logro',80,'%'),M('¿Cómo se puntúa un parámetro con cumplimiento parcial?',['0','1','2','NA'],1),M('Según la clase, ¿con este logro se aprueba?',['No, porque se pide 100 % de la lista','Sí, porque supera 60 %','Sí, si no hay reclamos'],0)],
+ 'Logro = PO ÷ PM × 100. La escala es 2, 1, 0 y NA.','60/75 = 80 %. El parcial vale 1. La clase indica 100 % de cumplimiento para aprobar.','Colectiva, diap. 26, 27'),
+I(AC,'Clasifica cada ejemplo.',
+ CL('',['Programa','Procedimiento','Registro'],[['Programa de limpieza y desinfección para cocinas',0],['Control planificado de plagas con objetivo y evaluación',0],['Paso a paso de limpieza del horno con diluciones',1],['Instrucción escrita de lavado de manos',1],['Hoja diaria de limpieza firmada',2],['Control de temperatura anotado con fecha y hora',2]]),
+ 'El programa dice qué se busca, el procedimiento cómo se hace y el registro demuestra que se hizo.','Programa: conjunto planificado. Procedimiento: instrucción detallada. Registro: evidencia escrita.','Colectiva, diap. 32–37'),
+I(AC,'Ordena los pasos de limpieza y desinfección.',
+ O('',['Retirar residuos sólidos','Lavar con detergente y agua caliente','Enjuagar con agua limpia','Aplicar desinfectante autorizado','Dejar actuar y enjuagar si es necesario','Secar al aire o con paño limpio','Registrar la actividad']),
+ 'No se desinfecta sobre suciedad. El registro siempre va al final.','Primero se limpia y enjuaga; después se desinfecta, se seca y se registra.','Colectiva, diap. 33'),
+I(AC,'Clasifica cada situación según el tipo de contaminación cruzada.',
+ CL('',['Directa','Indirecta'],[['Mezclar productos cocidos y crudos sin sanitizar',0],['Un alimento contaminado toca a otro que no lo está',0],['Picar verduras en una tabla usada para carne cruda',1],['Tocar un alimento con manos que manipularon basura',1],['Usar el mismo cuchillo para pollo crudo y ensalada',1]]),
+ 'Busca si existe un intermediario, como manos o utensilios.','Directa: contacto sin intermediario. Indirecta: a través de manos, utensilios o superficies.','Colectiva, diap. 35'),
+I(AC,'Caso. Debes planificar para un requerimiento de 2.200 kcal, con la distribución vista en Alimentación colectiva.',
+ [N('Desayuno (20 %)',440,'kcal'),N('Almuerzo (40 %)',880,'kcal'),N('Once (15 %)',330,'kcal'),N('Cena (25 %)',550,'kcal')],
+ 'Multiplica 2.200 por cada porcentaje.','440 + 880 + 330 + 550 = 2.200 kcal.','Colectiva, diap. 39, 40'),
+I(AC,'Caso. Un paciente pasa a régimen liviano.',
+ [CL('Clasifica cada modificación.',['Consistencia','Digestibilidad'],[['Líquido',0],['Papilla',0],['Blando',0],['Sin residuo',1],['Liviano',1],['Común',1]]),MU('¿Qué alimentos incluirías en régimen liviano?',['Pan blanco tostado','Pollo sin piel','Clara de huevo','Pan integral','Brócoli','Porotos enteros'],[0,1,2]),M('En un régimen sin residuo, ¿qué lácteo se acepta?',['Quesillo','Leche entera','Queso maduro','Crema'],0)],
+ 'El liviano evita meteorizantes y exceso de fibra. El sin residuo es el más restrictivo.','Liviano: refinados, carnes magras y clara. El brócoli es meteorizante. Sin residuo admite quesillo.','Colectiva, diap. 42, 44, 45'),
+I(AC,'Caso. Con la tabla de intercambio, planifica un desayuno con 1 porción de lácteo descremado y 1 de pan.',
+ [N('¿Cuántas porciones de azúcar faltan para llegar a 50 g de CHO?',2,'porciones'),N('Energía total del desayuno',250,'kcal'),MA('Une cada grupo con su energía por porción.',[['Frutas','60 kcal'],['Panes y cereales','140 kcal'],['Aceites y grasas','45 kcal'],['Legumbres secas','170 kcal']])],
+ 'Lácteo descremado 10 g, pan 30 g y azúcar 5 g de CHO.','10 + 30 + (2 × 5) = 50 g. Energía: 70 + 140 + 40 = 250 kcal.','Colectiva, diap. 47, 48'),
+I(AC,'Caso. Ley 16.744. Clasifica las situaciones de una trabajadora de casino y responde.',
+ [CL('',['Accidente del trabajo','Accidente de trayecto','Enfermedad profesional'],[['Se quema con una marmita durante el turno',0],['Choca mientras viaja desde su casa al trabajo',1],['Desarrolla una lesión causada directamente por su labor repetitiva',2]]),M('¿Qué denuncia corresponde a una enfermedad profesional?',['DIEP','DIAT','Licencia común'],0),MU('¿Quiénes administran este seguro?',['ACHS','Mutual de Seguridad','IST','ISL','Contraloría'],[0,1,2,3])],
+ 'La I de DIAT es de individual y la A, de accidente.','Accidente: DIAT. Enfermedad profesional: DIEP. Atención en mutualidades o ISL.','Colectiva, diap. 58, 61, 62'),
+I(AC,'Clasifica cada característica según la norma.',
+ CL('',['Código del Trabajo','Estatuto Administrativo'],[['Fiscaliza la Inspección del Trabajo',0],['Sector privado',0],['Regula el contrato (art. 10)',0],['Fiscaliza la Contraloría',1],['Cargos de planta y a contrata',1],['Carrera funcionaria',1]]),
+ 'Planta, contrata y carrera son conceptos del empleo público.','Código: sector privado. Estatuto: funcionarios del Estado.','Colectiva, diap. 65, 70, 76, 77'),
+I(AC,'Completa según la Ley 21.561 y la jornada laboral.',
+ CZ('','La ley redujo la jornada a 44 horas en 2024, a [[42 horas]] desde abril de 2026 y llegará a [[40 horas]] en 2028. El descanso mínimo entre jornadas de turnos es de [[12 horas]] y la colación dura al menos [[media hora]].',['45 horas','38 horas','8 horas','una hora']),
+ 'La reducción baja de a 2 horas por etapa.','44 horas en 2024, 42 en 2026 y 40 en 2028. Algunas diapositivas todavía muestran 44 horas.','Colectiva, diap. 71, 72, 74'),
+// ---------- CASOS INTEGRADOS ----------
+I(MX,'Caso integrado. Un hospital tiene una UCP con RCD 220 y produce pollo asado y arroz para distribuir a las salas.',
+ [M('Complejidad de la UCP',['Mínima','Mediana','Máxima'],1),N('Temperatura mínima de cocción del pollo',80,'°C'),N('Temperatura mínima de cocción del arroz',75,'°C'),N('Temperatura mínima al distribuir',65,'°C'),N('Tiempo máximo de distribución',120,'min')],
+ 'Mediana va de 150 a 299. Las aves están en el grupo de mayor temperatura.','Mediana; ave ≥ 80 °C; arroz ≥ 75 °C; caliente ≥ 65 °C durante máximo 120 minutos.','OT SAN, diap. 13, 62 · Colectiva, diap. 16'),
+I(MX,'Caso integrado. En una cámara de refrigeración el técnico registra 8 °C.',
+ [M('¿La cámara cumple?',['No, debe estar entre 0 y 5 °C','Sí, hasta 10 °C es aceptable'],0),MU('Un registro correcto debe incluir:',['Fecha y hora','Nombre y firma del responsable','Resultado del control','Acción correctiva','Solo la temperatura promedio del mes'],[0,1,2,3]),M('Los equipos de medición se abordan en un:',['POE','POES'],0),N('Según la OT, días mínimos para conservar registros tras el vencimiento',90,'días')],
+ 'Un registro se llena en el momento y deja evidencia de lo que se corrigió.','8 °C no cumple. El registro debe ser contemporáneo e incluir fecha, firma, resultado y corrección. La OT pide 90 días tras el vencimiento.','OT SAN, diap. 61, 63 · Colectiva, diap. 15, 36'),
+I(MX,'Caso integrado. La ficha técnica de acelga preelaborada indica consumo de 120 kg al mes, en bolsas de 3 kg.',
+ [N('Bolsas necesarias al mes',40,'bolsas'),M('Frecuencia de recepción sugerida',['Diaria','1 vez/semana','2–3 veces/semana','Mensual'],2),M('¿Dónde se almacena?',['Refrigeración','Bodega de abarrotes','Congelación a −18 °C'],0),CZ('Completa los campos de la ficha.','La ficha incluye nombre de la materia prima, [[proveedor]], unidad de medida, [[vida útil]] y condiciones de [[transporte]].',['color del camión','precio de venta'])],
+ '120 ÷ 3. Las verduras preelaboradas se reciben más seguido que las de granel.','Son 40 bolsas, recibidas 2–3 veces por semana y mantenidas refrigeradas.','OT SAN, diap. 48 · Colectiva, diap. 18, 19'),
+I(MX,'Caso integrado. Debes distribuir 2.000 kcal y comparar dos criterios.',
+ [N('Almuerzo con 40 % (Colectiva)',800,'kcal'),N('Tope de almuerzo con 35 % (OT SAN)',700,'kcal'),M('¿El 40 % está dentro del rango de la OT para almuerzo?',['No, la OT sugiere 30–35 %','Sí, la OT sugiere 40–45 %'],0),M('Al planificar, debes:',['Explicitar la referencia usada y que sume 100 %','Mezclar criterios sin indicarlo','Usar siempre el porcentaje más alto'],0)],
+ 'La OT señala que la selección debe explicitar la referencia.','40 % da 800 kcal y 35 % da 700 kcal. Cada referencia es válida si se explicita y suma 100 %.','OT SAN, diap. 55 · Colectiva, diap. 39'),
+I(MX,'Caso integrado. Una paciente con disfagia recibe régimen papilla. Se planifica una porción de 300 g.',
+ [N('Sólidos de la porción',195,'g'),N('Líquidos de la porción',105,'g'),M('Los niveles IDDSI se seleccionan entre:',['Nutricionista y fonoaudiólogo','Técnico y auxiliar','Médico y bodeguero'],0),M('Si es una preparación caliente, se distribuye a:',['≥ 65 °C','0–5 °C','≥ 80 °C'],0),M('La modificación de papilla es de:',['Consistencia','Digestibilidad','Aporte calórico'],0)],
+ 'La papilla tiene 65 % de sólidos y 35 % de líquidos.','300 × 0,65 = 195 g y 300 × 0,35 = 105 g.','OT SAN, diap. 56, 62 · Colectiva, diap. 42'),
+I(MX,'Caso integrado. Tras un almuerzo varios comensales presentan vómitos y diarrea y se sospecha un brote.',
+ [MU('¿Qué acciones corresponden?',['Usar las muestras de referencia para la investigación','Identificar procedencia y destino del producto','Retirar el producto y las preparaciones afectadas','Eliminar los registros del día','Consumir las muestras de referencia'],[0,1,2]),M('¿Qué concepto describe lo que ocurrió?',['ETA','Limpieza','Ficha técnica'],0),M('Si un manipulador tiene diarrea:',['No debe manipular alimentos','Puede trabajar con guantes','Puede trabajar con mascarilla'],0)],
+ 'La trazabilidad sirve justamente ante una alerta.','Las muestras se reservan para investigación, la trazabilidad permite retirar lo afectado y los registros se conservan.','OT SAN, diap. 63 · Colectiva, diap. 3, 8, 12'),
+I(MX,'Caso integrado. Una técnica a contrata de un hospital público resbala en la UCP durante su turno.',
+ [M('Es un:',['Accidente del trabajo','Accidente de trayecto','Enfermedad profesional'],0),M('Denuncia que corresponde',['DIAT','DIEP'],0),M('Su relación laboral se rige por:',['Estatuto Administrativo','Código del Trabajo'],0),M('El empleo a contrata es:',['Transitorio','Permanente por ley'],0),MU('¿Qué medidas previenen este accidente?',['Calzado antideslizante','Pisos no resbaladizos','Orden y limpieza','Eliminar el registro de EPP'],[0,1,2])],
+ 'Ocurrió durante el trabajo y en un establecimiento público.','Accidente del trabajo con DIAT. Contrata = transitorio, bajo Estatuto Administrativo. DS 594 exige pisos no resbaladizos.','Colectiva, diap. 52, 58, 62, 76'),
+I(MX,'Caso integrado. Una clínica privada tiene una UCP con RCD 300.',
+ [N('Técnicos de producción necesarios',7.5,'',0.05),M('¿Qué norma regula sus contratos?',['Código del Trabajo','Estatuto Administrativo'],0),N('Jornada ordinaria máxima vigente desde abril de 2026',42,'h/semana'),N('Jornada parcial máxima con esa jornada ordinaria',28,'h/semana'),M('¿Quién fiscaliza?',['Inspección del Trabajo','Contraloría'],0)],
+ 'RCD 300 está en el rango 201–400. La jornada parcial es máximo 2/3.','300/40 = 7,5 técnicos. Jornada 42 h y parcial 42 × 2/3 = 28 h.','OT SAN, diap. 31 · Colectiva, diap. 65, 71, 72'),
+I(MX,'Caso integrado. Un casino para funcionarios de un hospital entrega 240 raciones totales.',
+ [N('Técnicos para distribución en casino',2.4,'',0.05),M('El casino requiere:',['Autorización sanitaria','Solo aviso verbal'],0),N('Coeficiente de un almuerzo en la RTD',0.25,'',0.001),N('Límite de sodio al día según la OT',2000,'mg'),M('Al ofrecer una opción vegetariana, se verifica al menos:',['Energía y macronutrientes','Solo el color del plato'],0)],
+ 'En casino se usa 1:100 sobre raciones totales.','240/100 = 2,4 técnicos. Casinos requieren autorización sanitaria (art. 31) y la opción vegetariana verifica energía y macronutrientes.','OT SAN, diap. 31, 54 · Colectiva, diap. 54'),
+I(MX,'Caso integrado. En una auditoría se obtienen 70 de 78 puntos y se observa que el agua potable no acredita controles de cloro libre residual.',
+ [N('Logro (entero)',90,'%',0.5),M('El agua potable es:',['Un factor crítico','Un aspecto opcional'],0),M('¿Dónde se aborda el control de agua y hielo?',['POES','POE'],0),TF('Verdadero o falso',[['Un registro se puede completar al final del mes.',false],['Según la clase, para aprobar se pide 100 % de cumplimiento.',true],['El DS 977/96 aprueba el Reglamento Sanitario de los Alimentos.',true]])],
+ 'Logro = PO ÷ PM × 100. Un registro debe ser contemporáneo.','70/78 = 89,7 %, que redondea a 90 %. El agua es factor crítico y se aborda en POES.','OT SAN, diap. 61 · Colectiva, diap. 22, 26, 36')
+];
+
+const AREA={ot:'OT SAN',ac:'Colectiva',mx:'Integrado'};
+const KIND={mcq:'Alternativa',multi:'Selección múltiple',tf:'Verdadero o falso',num:'Cálculo',match:'Términos pareados',classify:'Clasificar',order:'Ordenar',cloze:'Completar'};
+const KEY='nut424-repaso-v1';
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!==undefined)e.innerHTML=h;return e};
+const shuffle=a=>{const r=a.slice();for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r};
+function derange(a){let r=shuffle(a);for(let t=0;t<8&&a.length>1&&r.every((x,i)=>x===a[i]);t++)r=shuffle(a);return r}
+let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}};
+
+let selected=null;
+function clearSel(){if(selected){selected.classList.remove('sel');selected=null}}
+
+function optionsPart(p,ctx,multi){
+  const box=el('div','opts');let done=false;const need=new Set(multi?p.a:[p.a]);const got=new Set();const btns=[];
+  shuffle(p.o.map((t,i)=>[t,i])).forEach(([t,i])=>{
+    const b=el('button','opt',t);b.type='button';btns[i]=b;
+    b.onclick=()=>{if(done||b.disabled)return;
+      if(need.has(i)){b.classList.add('ok');b.disabled=true;got.add(i);if(got.size===need.size){finish();ctx.changed()}}
+      else{b.classList.add('bad');b.disabled=true;ctx.error()}};
+    box.append(b)});
+  function finish(){done=true;btns.forEach(b=>b.disabled=true)}
+  return{node:box,done:()=>done,solve(){need.forEach(i=>{if(!got.has(i))btns[i].classList.add('sol')});finish()}}
+}
+function tfPart(p,ctx){
+  const box=el('div','tf');const rows=p.r.map(([s,v])=>{
+    box.append(el('p','',s));const w=el('div','tfbs');const st={v,done:false,b:{}};
+    [[true,'V'],[false,'F']].forEach(([val,l])=>{const b=el('button','tfb',l);b.type='button';b.setAttribute('aria-label',l==='V'?'Verdadero':'Falso');st.b[val]=b;
+      b.onclick=()=>{if(st.done||b.disabled)return;if(val===v){b.classList.add('ok');st.done=true;st.b[true].disabled=st.b[false].disabled=true;ctx.changed()}else{b.classList.add('bad');b.disabled=true;ctx.error()}};w.append(b)});
+    box.append(w);return st});
+  return{node:box,done:()=>rows.every(r=>r.done),solve(){rows.forEach(r=>{if(!r.done){r.b[r.v].classList.add('sol');r.done=true;r.b[true].disabled=r.b[false].disabled=true}})}}
+}
+function parseNum(s){s=s.trim().replace(/\s/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');const v=parseFloat(s);return isFinite(v)&&/^-?[\d.]+$/.test(s)?v:null}
+const fmt=v=>String(v).replace('.',',');
+let inputId=0;
+function numPart(p,ctx){
+  const row=el('div','numrow');const inp=el('input');inp.id='n'+(++inputId);inp.inputMode='decimal';inp.autocomplete='off';inp.setAttribute('aria-label',p.q||'Resultado');
+  const unit=el('span','',p.u||'');const msg=el('span','msg');row.append(inp,unit,msg);
+  let done=false,t=null,last=null;
+  function check(){if(done)return;const v=parseNum(inp.value);if(v===null){inp.classList.remove('ok','bad');msg.textContent='';return}
+    if(Math.abs(v-p.a)<=p.tol+1e-9){done=true;inp.classList.remove('bad');inp.classList.add('ok');inp.readOnly=true;msg.className='msg ok';msg.textContent='Correcto';ctx.changed()}
+    else{inp.classList.add('bad');msg.className='msg bad';msg.textContent='Revisa el cálculo';if(last!==v){last=v;ctx.error()}}}
+  inp.oninput=()=>{clearTimeout(t);inp.classList.remove('bad');msg.textContent='';t=setTimeout(check,900)};
+  inp.onkeydown=e=>{if(e.key==='Enter'){clearTimeout(t);check()}};
+  return{node:row,done:()=>done,solve(){if(done)return;clearTimeout(t);done=true;inp.value=fmt(p.a);inp.readOnly=true;inp.classList.remove('bad');inp.classList.add('sol');msg.className='msg sol';msg.textContent='Solución'}}
+}
+function slotsPart(p,ctx){
+  const box=el('div');const pool=el('div','pool');box.append(pool);const slots=[];let chips=[];
+  const mkSlot=(key,multi)=>{const s=el('div','slot');s.tabIndex=0;s.setAttribute('role','button');s.setAttribute('aria-label','Espacio para ubicar');s._s={key,multi};slots.push(s);
+    s.onclick=e=>{if(e.target.closest('.chip'))return;if(selected&&selected._c.root===box){const c=selected;clearSel();place(c,s)}};
+    s.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&selected&&selected._c.root===box){e.preventDefault();const c=selected;clearSel();place(c,s)}};
+    return s};
+  const mkChip=(text,key)=>{const c=el('button','chip',text);c.type='button';c._c={key,root:box,locked:false};chips.push(c);bindDrag(c);return c};
+  let pairs=[];
+  if(p.k==='match'){pairs=p.p.map(([t,d])=>[t,d]);const list=el('div','mlist');pairs.forEach(([t,d],i)=>{const r=el('div','mrow');r.append(mkSlot(i,false),el('span','',d));list.append(r)});box.append(list);derange(pairs.map((x,i)=>i)).forEach(i=>pool.append(mkChip(pairs[i][0],i)))}
+  else if(p.k==='classify'){const g=el('div','buckets');p.b.forEach((b,i)=>{const w=el('div','bucket');w.append(el('h4','',b),mkSlot(i,true));g.append(w)});box.append(g);shuffle(p.i).forEach(([t,k])=>pool.append(mkChip(t,k)))}
+  else if(p.k==='order'){const l=el('div','olist');p.s.forEach((t,i)=>{const r=el('div','orow');r.append(el('b','',i+1),mkSlot(i,false));l.append(r)});box.append(l);derange(p.s.map((x,i)=>i)).forEach(i=>pool.append(mkChip(p.s[i],i)))}
+  else{const c=el('div','cloze');const parts=p.t.split(/\[\[(.+?)\]\]/);const words=[];parts.forEach((s,i)=>{if(i%2){c.append(mkSlot(s,false));words.push(s)}else c.append(document.createTextNode(s))});box.append(c);shuffle(words.map(w=>[w,w]).concat(p.x.map(w=>[w,'__x']))).forEach(([t,k])=>pool.append(mkChip(t,k)))}
+  function place(c,s){if(c._c.locked)return;const d=s._s;
+    if(!d.multi){const cur=s.querySelector('.chip');if(cur){if(cur===c)return;if(cur._c.locked)return;cur.classList.remove('bad');pool.append(cur)}}
+    s.append(c);c.classList.remove('bad');
+    if(c._c.key===d.key){c.classList.add('ok');c._c.locked=true;ctx.changed()}else{c.classList.add('bad');ctx.error()}}
+  function bindDrag(c){let sx,sy,moved=false,g=null,over=null,pid=null;
+    c.addEventListener('pointerdown',e=>{if(c._c.locked||e.button)return;sx=e.clientX;sy=e.clientY;moved=false;pid=e.pointerId;
+      const mv=ev=>{if(ev.pointerId!==pid)return;const dx=ev.clientX-sx,dy=ev.clientY-sy;if(!moved&&Math.hypot(dx,dy)>6){moved=true;clearSel();g=c.cloneNode(true);g.classList.add('ghost');g.style.width=c.offsetWidth+'px';document.body.append(g);c.style.opacity='.35'}
+        if(moved){g.style.left=(ev.clientX-c.offsetWidth/2)+'px';g.style.top=(ev.clientY-18)+'px';const t=document.elementFromPoint(ev.clientX,ev.clientY);const s=t&&t.closest('.slot');const ok=s&&slots.includes(s)?s:null;if(over!==ok){over&&over.classList.remove('over');ok&&ok.classList.add('over');over=ok}
+          if(ev.clientY<150)window.scrollBy(0,-10);else if(ev.clientY>innerHeight-70)window.scrollBy(0,10);ev.preventDefault()}};
+      const up=ev=>{if(ev.pointerId!==pid)return;removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);
+        if(moved){g.remove();g=null;c.style.opacity='';c._skip=true;setTimeout(()=>c._skip=false,50);if(over){over.classList.remove('over');place(c,over);over=null}else if(c.parentElement!==pool){c.classList.remove('bad');pool.append(c)}}};
+      addEventListener('pointermove',mv,{passive:false});addEventListener('pointerup',up);addEventListener('pointercancel',up)});
+    c.addEventListener('click',()=>{if(c._skip||c._c.locked)return;
+      if(c.parentElement!==pool){c.classList.remove('bad');pool.append(c);return}
+      if(selected===c){clearSel();return}clearSel();selected=c;c.classList.add('sel')})}
+  const need=()=>chips.filter(c=>c._c.key!=='__x');
+  return{node:box,done:()=>need().every(c=>c._c.locked),solve(){clearSel();
+    need().forEach(c=>{if(c._c.locked)return;const s=slots.find(x=>x._s.key===c._c.key&&(x._s.multi||!x.querySelector('.chip.ok,.chip.sol')));const cur=s&&!s._s.multi&&s.querySelector('.chip');if(cur&&cur!==c){cur.classList.remove('bad');pool.append(cur)}s.append(c);c.classList.remove('bad','sel');c.classList.add('sol');c._c.locked=true});
+    chips.filter(c=>c._c.key==='__x').forEach(c=>{if(c.parentElement!==pool)pool.append(c);c.classList.remove('bad','sel');c.classList.add('dim');c._c.locked=true})}}
+}
+const mountPart=(p,ctx)=>p.k==='mcq'?optionsPart(p,ctx,false):p.k==='multi'?optionsPart(p,ctx,true):p.k==='tf'?tfPart(p,ctx):p.k==='num'?numPart(p,ctx):slotsPart(p,ctx);
+
+const items=[];const grid=$('#grid'),list=$('#list');
+const STATE={clean:'Correcta a la primera',errors:'Resuelta con errores',revealed:'Solución vista'};
+function buildCard(q,i){
+  const card=el('article','q');card.id='q'+(i+1);
+  const it=items[i]||(items[i]={q,card});it.errors=0;it.revealed=false;it.status=null;
+  const head=el('div','qh');const label=q.parts.length>1?'Caso':KIND[q.parts[0].k];
+  head.append(el('span','num',i+1),el('span','tag',AREA[q.area]),el('span','tag',label));const st=el('span','state');head.append(st);card.append(head);
+  card.append(el('p','stem',q.stem));
+  const ctx={error(){it.errors++},changed(){check()}};
+  it.parts=q.parts.map((p,j)=>{const w=el('div','part');if(p.q||q.parts.length>1){const lab=q.parts.length>1?`<span class="lab">${String.fromCharCode(97+j)})</span>`:'';if(p.q||lab)w.append(el('p','pq',lab+(p.q||KIND[p.k])))}const m=mountPart(p,ctx);w.append(m.node);card.append(w);return m});
+  const acts=el('div','acts');const hintB=el('button','b','Pista');hintB.type='button';const solB=el('button','b main','Ver solución');solB.type='button';const redo=el('button','b','Reintentar');redo.type='button';acts.append(hintB,solB,redo);card.append(acts);
+  const hint=el('div','note',`<strong>Pista.</strong> ${q.hint}`);hint.hidden=true;const exp=el('div','note',`<strong>Explicación.</strong> ${q.exp}<span class="src">Fuente: ${q.src}</span>`);exp.hidden=true;card.append(hint,exp);
+  hintB.onclick=()=>{hint.hidden=!hint.hidden};
+  solB.onclick=()=>{if(it.status)return;it.revealed=true;it.parts.forEach(m=>m.solve());finish('revealed')};
+  redo.onclick=()=>{delete saved[i+1];save();const old=card;const nc=buildCard(q,i);old.replaceWith(nc);applyFilter();refresh()};
+  function check(){if(!it.status&&it.parts.every(m=>m.done()))finish(it.revealed?'revealed':it.errors?'errors':'clean')}
+  function finish(s,quiet){it.status=s;card.classList.remove('clean','errors','revealed');card.classList.add(s);st.className='state '+s;st.textContent=STATE[s];exp.hidden=false;solB.disabled=true;saved[i+1]=s;if(!quiet){save();refresh();applyFilter()}}
+  it.restore=s=>{it.parts.forEach(m=>m.solve());finish(s,true)};
+  it.card=card;return card}
+Q.forEach((q,i)=>{const n=el('button','n',i+1);n.type='button';n.setAttribute('aria-label','Ir a la pregunta '+(i+1));n.onclick=()=>{if(items[i].card.hidden){filt='all';st8='all';drawFilters();applyFilter()}items[i].card.scrollIntoView({behavior:'smooth',block:'start'})};grid.append(n);const card=buildCard(q,i);list.append(card);if(saved[i+1])items[i].restore(saved[i+1])});
+
+let filt='all',st8='all';
+const FS=[['all','Todas'],['ot','OT SAN'],['ac','Colectiva'],['mx','Integrados']];
+function drawFilters(){const f=$('#filters');f.innerHTML='';FS.forEach(([k,t])=>{const b=el('button','f',t);b.type='button';b.setAttribute('aria-pressed',filt===k);b.onclick=()=>{filt=k;drawFilters();applyFilter()};f.append(b)});
+  const b=el('button','f','Solo pendientes');b.type='button';b.setAttribute('aria-pressed',st8==='p');b.onclick=()=>{st8=st8==='p'?'all':'p';drawFilters();applyFilter()};f.append(b);
+  const e=el('button','f','Con errores');e.type='button';e.setAttribute('aria-pressed',st8==='e');e.onclick=()=>{st8=st8==='e'?'all':'e';drawFilters();applyFilter()};f.append(e)}
+function applyFilter(){let shown=0;items.forEach(it=>{const a=filt==='all'||it.q.area===filt;const b=st8==='all'||(st8==='p'&&!it.status)||(st8==='e'&&it.status==='errors');it.card.hidden=!(a&&b);if(a&&b)shown++});
+  let m=$('#none');if(!shown){if(!m){m=el('p','empty','No hay preguntas con este filtro.');m.id='none';list.append(m)}}else if(m)m.remove()}
+const nota=c=>{const p=c/50;return p<.6?1+p/.6*3:4+(p-.6)/.4*3};
+function refresh(){const done=items.filter(i=>i.status).length,clean=items.filter(i=>i.status==='clean').length;
+  $('#sDone').textContent=done+'/50';$('#sClean').textContent=clean;$('#prog').style.width=(done/50*100)+'%';
+  $('#sNote').textContent=done?nota(clean/done*50).toFixed(1).replace('.',','):'–';
+  [...grid.children].forEach((n,i)=>{n.className='n '+(items[i].status||'')});
+  if(done===50){const rev=items.filter(i=>i.status==='revealed').length,err=items.filter(i=>i.status==='errors').length;$('#endT').textContent=`Nota estimada: ${nota(clean).toFixed(1).replace('.',',')}`;$('#endP').textContent=`${clean} de 50 a la primera, ${err} con errores y ${rev} con solución vista. Escala 1,0 a 7,0 con 60 % de exigencia.`}
+  else{$('#endT').textContent='Tu resultado aparecerá aquí';$('#endP').textContent='Una pregunta cuenta como correcta a la primera si la resolviste sin errores y sin ver la solución. Las pistas no bajan el puntaje.'}}
+function resetUI(){const r=$('#resetBox');r.innerHTML='';const b=el('button','b','Reiniciar toda la prueba');b.type='button';b.id='reset';b.onclick=()=>{r.innerHTML='';const p=el('span','','¿Borrar todo tu avance? ');const y=el('button','b','Sí, reiniciar');y.type='button';const n=el('button','b','Cancelar');n.type='button';n.style.marginLeft='6px';p.style.marginRight='8px';
+    y.onclick=()=>{saved={};save();list.innerHTML='';Q.forEach((q,i)=>{list.append(buildCard(q,i))});applyFilter();refresh();resetUI();window.scrollTo(0,0)};n.onclick=resetUI;r.append(p,y,n)};r.append(b)}
+drawFilters();applyFilter();refresh();resetUI();
+document.addEventListener('click',e=>{if(selected&&!e.target.closest('.chip,.slot'))clearSel()});
+</script>
+
+</body>
+</html>
